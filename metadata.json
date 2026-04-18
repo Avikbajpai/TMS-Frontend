@@ -1,0 +1,6 @@
+{
+  "name": "NexusTMS",
+  "description": "A production-quality Ticket Management System featuring a layered architecture, role-based access control, and a modern SaaS-inspired dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
