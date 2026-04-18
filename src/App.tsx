@@ -10,9 +10,11 @@ import { TicketResponseDTO, DashboardStatsDTO } from './api/dtos';
 import { Plus, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:8080/api';
+
 
 export default function App() {
+  const [showSuccess, setShowSuccess] = useState(false);
   const [tab, setTab] = useState('dashboard');
   const [tickets, setTickets] = useState<TicketResponseDTO[]>([]);
   const [stats, setStats] = useState<DashboardStatsDTO | null>(null);
@@ -21,6 +23,7 @@ export default function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({ id: 'u1', name: 'Alice Customer', role: UserRole.CUSTOMER });
   const [engineers, setEngineers] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -29,21 +32,24 @@ export default function App() {
       setLoading(true);
       const headers = { 'x-user-id': currentUser.id, 'x-user-role': currentUser.role };
       
-      const [ticketsRes, statsRes, engRes] = await Promise.all([
+      const [ticketsRes, statsRes, engRes, usersRes] = await Promise.all([
         fetch(`${API_BASE}/tickets`, { headers }),
-        fetch(`${API_BASE}/tickets/stats`, { headers }),
-        fetch(`${API_BASE}/tickets/engineers`, { headers })
+        fetch(`${API_BASE}/dashboard/stats`, { headers }),
+        fetch(`${API_BASE}/engineers`, { headers }),
+        fetch(`${API_BASE}/users`, { headers })
       ]);
 
-      const [ticketsData, statsData, engData] = await Promise.all([
+      const [ticketsData, statsData, engData, usersData] = await Promise.all([
         ticketsRes.json(),
         statsRes.json(),
-        engRes.json()
+        engRes.json(),
+        usersRes.json()
       ]);
 
-      setTickets(ticketsData);
-      setStats(statsData);
-      setEngineers(engData);
+      setTickets(ticketsData.data);
+      setStats(statsData.data);
+      setEngineers(engData.data);
+      setUsers(usersData.data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -64,6 +70,7 @@ export default function App() {
       });
       if (res.ok) {
         setIsFormOpen(false);
+        setShowSuccess(true);
         fetchAll();
       }
     } catch (e) { console.error(e); }
@@ -78,7 +85,7 @@ export default function App() {
       });
       if (res.ok) {
         const updated = await res.json();
-        setSelectedTicket(updated);
+        setSelectedTicket(updated.data);
         fetchAll();
       }
     } catch (e) { console.error(e); }
@@ -93,7 +100,7 @@ export default function App() {
       });
       if (res.ok) {
         const updated = await res.json();
-        setSelectedTicket(updated);
+        setSelectedTicket(updated.data);
         fetchAll();
       }
     } catch (e) { console.error(e); }
@@ -134,7 +141,7 @@ export default function App() {
               >
                 <Dashboard stats={stats} />
               </motion.div>
-            ) : (
+            ) : tab === 'tickets' ? (
               <motion.div 
                  key="tickets"
                  initial={{ opacity: 0 }}
@@ -209,7 +216,53 @@ export default function App() {
                     </div>
                  </div>
               </motion.div>
-            )}
+            ): tab === 'users' ? (
+              <motion.div
+  key="users"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  className="space-y-5"
+>
+  <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div className="px-4 py-3 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+      <h3 className="text-sm font-bold text-slate-900">Users</h3>
+      <span className="text-[10px] font-bold text-slate-400 uppercase">
+        {users.length} Users
+      </span>
+    </div>
+
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200">
+            <th className="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase">ID</th>
+            <th className="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase">Name</th>
+            <th className="px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase">Role</th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-slate-100">
+          {users.map(user => (
+            <tr key={user.id} className="hover:bg-blue-50/30 transition">
+              <td className="px-4 py-3 text-xs font-mono text-slate-400">
+                #{user.id}
+              </td>
+              <td className="px-4 py-3 text-xs font-bold text-slate-900">
+                {user.name}
+              </td>
+              <td className="px-4 py-3">
+                <Badge variant="default">{user.role}</Badge>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</motion.div>
+            ): null
+          }
           </AnimatePresence>
         </div>
 
@@ -280,6 +333,37 @@ export default function App() {
           isSubmitting={false}
         />
       )}
+
+      {showSuccess && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+    <div className="bg-white rounded-xl shadow-2xl p-6 w-[320px] text-center animate-fade-in">
+      
+      <div className="flex justify-center mb-3">
+        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+          <span className="text-green-600 text-xl">✓</span>
+        </div>
+      </div>
+
+      <h2 className="text-lg font-bold text-slate-900 mb-1">
+        Ticket Created!
+      </h2>
+
+      <p className="text-xs text-slate-500 mb-5">
+        Your ticket has been successfully created.
+      </p>
+
+      <button
+        onClick={() => {
+          setShowSuccess(false);
+          setTab('tickets'); // ✅ redirect
+        }}
+        className="w-full bg-blue-600 text-white py-2 rounded-md text-xs font-bold hover:bg-blue-700 transition"
+      >
+        Go to All Tickets
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

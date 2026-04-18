@@ -22,7 +22,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({
   onAssign,
   engineers 
 }) => {
-  const isCreator = ticket.createdBy.id === currentUser.id;
+  const isCreator = ticket.createdBy?.id === currentUser.id;
+  console.log(ticket);
   const isEngineer = currentUser.role === UserRole.ENGINEER;
   const isAdmin = currentUser.role === UserRole.ADMIN;
   const isAssignedToMe = ticket.assignedTo?.id === currentUser.id;
