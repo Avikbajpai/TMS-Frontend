@@ -11,7 +11,7 @@ import { Plus, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LoginModal } from './components/LoginModal';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://tms-nexus-api.onrender.com/api';
 
 
 export default function App() {
