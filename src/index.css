@@ -16,6 +16,17 @@
   --color-red-600: #dc2626;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #334155 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: white !important;
+  border-radius: 6px;
+}
+
 @layer base {
   body {
     @apply font-sans antialiased text-slate-900 bg-slate-100;

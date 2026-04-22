@@ -10,11 +10,13 @@ import { TicketResponseDTO, DashboardStatsDTO } from './api/dtos';
 import { Plus, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LoginModal } from './components/LoginModal';
+import Signup from './components/Signup';
 
 const API_BASE = 'https://tms-nexus-api.onrender.com/api';
 
 
 export default function App() {
+  const [authMode, setAuthMode] = useState("login");
   const [showSuccess, setShowSuccess] = useState(false);
   const [tab, setTab] = useState('dashboard');
   const [tickets, setTickets] = useState<TicketResponseDTO[]>([]);
@@ -133,14 +135,17 @@ useEffect(() => {
   });
  
 if (!currentUser) {
-  return (
+  return authMode === "login" ? (
     <LoginModal
       onLogin={(data: any) => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.data));
         setCurrentUser(data.data);
       }}
+      onSwitch={() => setAuthMode("signup")}
     />
+  ) : (
+    <Signup onSwitch={() => setAuthMode("login")} />
   );
 }
 
